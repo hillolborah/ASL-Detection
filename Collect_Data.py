@@ -12,8 +12,8 @@ detector=HandDetector(maxHands=2)
 offset = 20
 imgSize = 128
 
-# The saving file direction variable
-folder = 'data\\2'
+# The saving file direction variablee
+folder = 'testfolder'
 
 c=0
 

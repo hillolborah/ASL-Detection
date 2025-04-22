@@ -8,17 +8,32 @@ from torchvision import transforms
 from PIL import Image  # Required for transforms
 from cvzone.HandTrackingModule import HandDetector
 
-# Define the model architecture (same as training)
-model = models.mobilenet_v2(pretrained=False)
-model.classifier[1] = nn.Linear(model.last_channel, 36)  # Assuming 36 classes (A-Z + 0-9)
+# # Define the model architecture (same as training)
+# model = models.mobilenet_v2(pretrained=False)
+# model.classifier[1] = nn.Linear(model.last_channel, 36)  # Assuming 36 classes (A-Z + 0-9)
 
-# Load the trained weights
-model.load_state_dict(torch.load("asl_mobilenetv2_best.pth", map_location=torch.device('cpu')))
-model.eval()  # Set to evaluation mode
+# # Load the trained weights
+# model.load_state_dict(torch.load("asl_mobilenetv2_best.pth", map_location=torch.device('cpu')))
+# model.eval()  # Set to evaluation mode
+
+# Set device
+device = torch.device("cuda" )
+
+# Define model architecture
+model = models.mobilenet_v2(pretrained=False)
+model.classifier[1] = nn.Linear(model.last_channel, 36)
+
+# Load weights
+model.load_state_dict(torch.load("ASL-Detection/asl_mobilenetv2_best.pth", map_location=device))
+model.to(device)  # Move model to device
+model.eval()
+
 
 
 # Initialize webcam and hand detector
 cap = cv2.VideoCapture(0)
+
+
 detector = HandDetector(maxHands=2)
 
 # Define transforms (EXACTLY as in training)
@@ -43,10 +58,13 @@ labels = [
 while True:
     success, img = cap.read()
     if not success:
+        print("Webcam read failed.")
         break
 
     # Detect hands
     hands, img = detector.findHands(img)
+    if not hands:
+        print("No hands detected.")
 
     if hands:
         # Get hand bounding box
